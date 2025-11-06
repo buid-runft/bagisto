@@ -2,7 +2,7 @@
 
 ## Multi-Vendor Marketplace with MLM Support - Laravel 12.2
 
-**Total Models Created: 48 Complete Eloquent Models**
+**Total Models Created: 50 Complete Eloquent Models**
 
 ---
 
@@ -16,12 +16,13 @@
 | `Role` | RBAC role management | System roles protection, permission syncing |
 | `Permission` | Granular permissions | Grouped permissions, role assignment |
 
-### 2. **Vendor System Models (3)**
+### 2. **Vendor System Models (4)**
 | Model | Description | Key Features |
 |-------|-------------|--------------|
 | `Vendor` | Multi-vendor shop management | Approval workflow, commission rates, shop stats, rating system |
 | `VendorDocument` | KYC document verification | Document types (ID, license, tax), expiry tracking |
 | `VendorPayout` | Vendor commission payouts | Auto number generation, multiple payment methods, period tracking |
+| `VendorSubscription` | การจัดการการสมัครสมาชิกผู้ขาย | อ้างอิง MLM API, เก็บเฉพาะ vendor, ติดตามสถานะ, วันที่หมดอายุ |
 
 ### 3. **Product System Models (6)**
 | Model | Description | Key Features |
@@ -55,7 +56,7 @@
 | `OrderStatusHistory` | Status tracking | Timeline, notes, user tracking, Thai status names |
 | `ReturnRequest` | Product returns | Approval workflow, refund methods, auto number |
 
-### 7. **MLM System Models (4)**
+### 7. **MLM System Models (6)**
 | Model | Description | Key Features |
 |-------|-------------|--------------|
 | `MlmPackage` | Commission packages | Multi-level rates (5 levels), percentage/fixed types |
@@ -92,15 +93,16 @@
 | `EmailTemplate` | Email templates | Variable replacement, bilingual, system protection |
 | `Notification` | User notifications | Type-based, read status, bulk sending, auto cleanup |
 
-### 12. **Settings & Configuration Models (4)**
+### 12. **Settings & Configuration Models (5)**
 | Model | Description | Key Features |
 |-------|-------------|--------------|
 | `Setting` | System settings | Key-value store, type casting, grouped settings |
 | `ShippingMethod` | Shipping options | Multiple calculation types, carrier tracking, Thai carriers |
 | `PaymentGateway` | Payment methods | Fee calculation, currency support, test mode |
+| `ThirdPartyApi` | การจัดการ API บุคคลที่สาม | จัดการการเชื่อมต่อ, ติดตามสถานะ, บันทึกการซิงค์ |
 | `Media` | File management | Multiple disks (local/S3), thumbnails, file type detection |
 
-### 13. **Inventory & Tracking Models (4)**
+### 13. **Inventory & Tracking Models (6)**
 | Model | Description | Key Features |
 |-------|-------------|--------------|
 | `StoreCredit` | Customer credits | Expiry dates, multiple types, balance tracking |
@@ -343,9 +345,49 @@ php artisan make:resource OrderResource
 
 ---
 
+## 📋 อัปเดตใหม่: พิมพ์เขียวเพิ่มเติม (New Blueprints Updates)
+
+### 1. **อินเตอร์เฟสสำหรับการสมัครสมาชิกผู้ขาย**
+- เพิ่มอินเตอร์เฟสสำหรับการสมัครสมาชิกผู้ขายที่ต้องอ้างอิงไปยัง API ของ MLM
+- จัดเก็บข้อมูลอยู่ในฐานข้อมูลสำหรับผู้ขายเท่านั้น
+- ติดตามสถานะการสมัครสมาชิก (active, expired, cancelled)
+- บันทึกวันที่สมัครและวันที่หมดอายุ
+- เชื่อมโยงกับ `Vendor` และ `MlmApiConfig`
+
+| Model | Description | Key Features |
+|-------|-------------|--------------|
+| `VendorSubscription` | การจัดการการสมัครสมาชิกผู้ขาย | อ้างอิง MLM API, เก็บเฉพาะ vendor, ติดตามสถานะ, วันที่หมดอายุ |
+
+### 2. **อินเตอร์เฟสในหน้า Setting ของ Admin สำหรับ API บุคคลที่ 3**
+- เพิ่มอินเตอร์เฟสในหน้า setting ของ admin สำหรับการเพิ่ม ลบ แก้ไข หรือติดตามสถานะของการเชื่อมต่อ API บุคคลที่ 3
+- จัดการการเชื่อมต่อ API บุคคลที่สาม
+- ฟังก์ชันเพิ่ม, ลบ, แก้ไข, และติดตามสถานะ
+- บันทึกข้อมูลการเชื่อมต่อ (endpoint, API key, secret)
+- ติดตามสถานะการเชื่อมต่อ (connected, disconnected, error)
+- ประวัติการซิงค์และ error logs
+
+| Model | Description | Key Features |
+|-------|-------------|--------------|
+| `ThirdPartyApi` | การจัดการ API บุคคลที่สาม | เพิ่ม/ลบ/แก้ไข/ติดตามสถานะ, บันทึกการเชื่อมต่อ, ประวัติซิงค์ |
+
+### 3. **บันทึกเกี่ยวกับแผงควบคุมผู้ขาย**
+- เพิ่มบันทึกเกี่ยวกับแผงควบคุมผู้ขายที่ขาดฟังก์ชันการควบคุมสินค้า
+- และติดตามธุรกรรมที่มีปฏิสัมพันธ์กับทั้งระบบ
+- แผงควบคุมผู้ขายขาดฟังก์ชันการควบคุมสินค้า (product management)
+- ขาดการติดตามธุรกรรมที่มีปฏิสัมพันธ์กับทั้งระบบ (transaction tracking across the system)
+- ควรเพิ่ม:
+  - ฟังก์ชันจัดการสินค้า (เพิ่ม, แก้ไข, ลบสินค้า)
+  - ติดตามคำสั่งซื้อและธุรกรรมทั้งหมด
+  - รายงานยอดขายและคอมมิชชัน
+  - การจัดการสต็อกและสินค้าคงคลัง
+
+**หมายเหตุ:** แผงควบคุมผู้ขายจำเป็นต้องพัฒนาเพิ่มเติมเพื่อให้ครบถ้วนในการจัดการสินค้าและติดตามธุรกรรมที่เกี่ยวข้องกับระบบทั้งหมด
+
+---
+
 ## ✨ Summary
 
-**48 Production-Ready Eloquent Models** with:
+**50 Production-Ready Eloquent Models** with:
 - ✅ Complete relationships
 - ✅ Business logic methods
 - ✅ Query scopes
@@ -355,5 +397,6 @@ php artisan make:resource OrderResource
 - ✅ MLM commission system
 - ✅ Multi-vendor support
 - ✅ Comprehensive e-commerce features
+- ✅ New vendor subscription and third-party API management
 
 **Ready for immediate use in your Laravel 12.2 Bagisto-based marketplace!** 🎉
